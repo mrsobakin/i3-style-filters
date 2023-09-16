@@ -25,7 +25,7 @@ mod theme;
 mod writer;
 mod filters;
 
-use filters::Filter;
+use filters::{Filter, Filterable};
 
 include!(concat!(env!("OUT_DIR"), "/data.rs"));
 

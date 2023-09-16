@@ -124,10 +124,10 @@ pub struct Theme {
     pub bar_colors: Option<BarColors>,
 }
 
-impl Theme {
-    pub fn apply_filter(&mut self, filter: &impl Filter) {
-        self.window_colors.as_mut().map(|x| x.apply_filter(filter));
-        self.bar_colors.as_mut().map(|x| x.apply_filter(filter));
+impl Filterable for Theme {
+    fn apply_filter(&mut self, filter: &impl Filter) {
+        self.window_colors.apply_filter(filter);
+        self.bar_colors.apply_filter(filter);
     }
 }
 
