@@ -188,7 +188,7 @@ fn main() {
             .short("f")
             .long("filter")
             .value_name("hue")
-            .help("Hue rotation from 0.0 to 1.0")
+            .help("Hue rotation from 0 to 360")
             .takes_value(true)
             )
         .arg(Arg::with_name("reload")
