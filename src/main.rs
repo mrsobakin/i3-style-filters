@@ -1,6 +1,7 @@
 #[macro_use]
 extern crate lazy_static;
 extern crate linked_hash_map;
+extern crate palette;
 use std::env;
 use std::fs;
 use std::fs::create_dir_all;
@@ -22,6 +23,9 @@ use clap::{App, Arg};
 
 mod theme;
 mod writer;
+mod filters;
+
+use filters::Filter;
 
 include!(concat!(env!("OUT_DIR"), "/data.rs"));
 
@@ -180,6 +184,13 @@ fn main() {
              .long("save")
              .help("Set the output file to the path of the input file")
             )
+        .arg(Arg::with_name("filter")
+            .short("f")
+            .long("filter")
+            .value_name("hue")
+            .help("Hue rotation from 0.0 to 1.0")
+            .takes_value(true)
+            )
         .arg(Arg::with_name("reload")
              .short("r")
              .long("reload")
@@ -275,7 +286,13 @@ fn main() {
             }
         }
     }
-    let theme = theme.unwrap();
+    let mut theme = theme.unwrap();
+
+    if let Some(filter) = app.value_of("filter") {
+        let hue = filter.parse::<f32>().unwrap();
+        let filter = filters::HueFilter{ hue };
+        theme.apply_filter(&filter);
+    }
 
     let output = if app.value_of("output").is_some() {
         app.value_of("output")

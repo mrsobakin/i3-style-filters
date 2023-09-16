@@ -8,6 +8,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
 use yaml_rust::Yaml;
+use filters::Filter;
 
 #[derive(Debug)]
 pub struct ColorGroup {
@@ -15,6 +16,23 @@ pub struct ColorGroup {
     pub background: Option<String>,
     pub text: Option<String>,
     pub indicator: Option<String>,
+}
+
+impl ColorGroup {
+    fn apply_filter(&mut self, filter: &impl Filter) {
+        if let Some(border) = &self.border {
+            self.border = Some(filter.apply(&border));
+        }
+        if let Some(background) = &self.background {
+            self.background = Some(filter.apply(&background));
+        }
+        if let Some(text) = &self.text {
+            self.text = Some(filter.apply(&text));
+        }
+        if let Some(indicator) = &self.indicator {
+            self.indicator = Some(filter.apply(&indicator));
+        }
+    }
 }
 
 impl ColorGroup {
@@ -75,6 +93,15 @@ pub struct WindowColors {
     pub urgent: Option<ColorGroup>,
 }
 
+impl WindowColors {
+    fn apply_filter(&mut self, filter: &impl Filter) {
+        self.focused.as_mut().map(|x| x.apply_filter(filter));
+        self.focused_inactive.as_mut().map(|x| x.apply_filter(filter));
+        self.unfocused.as_mut().map(|x| x.apply_filter(filter));
+        self.urgent.as_mut().map(|x| x.apply_filter(filter));
+    }
+}
+
 #[derive(Debug)]
 pub struct BarColors {
     pub separator: Option<String>,
@@ -86,11 +113,36 @@ pub struct BarColors {
     pub urgent_workspace: Option<ColorGroup>,
 }
 
+impl BarColors {
+    fn apply_filter(&mut self, filter: &impl Filter) {
+        if let Some(separator) = &self.separator {
+            self.separator = Some(filter.apply(&separator));
+        }
+        if let Some(background) = &self.background {
+            self.background = Some(filter.apply(&background));
+        }
+        if let Some(statusline) = &self.statusline {
+            self.statusline = Some(filter.apply(&statusline));
+        }
+        self.focused_workspace.as_mut().map(|x| x.apply_filter(filter));
+        self.active_workspace.as_mut().map(|x| x.apply_filter(filter));
+        self.inactive_workspace.as_mut().map(|x| x.apply_filter(filter));
+        self.urgent_workspace.as_mut().map(|x| x.apply_filter(filter));
+    }
+}
+
 #[derive(Debug)]
 pub struct Theme {
     pub description: Option<String>,
     pub window_colors: Option<WindowColors>,
     pub bar_colors: Option<BarColors>,
+}
+
+impl Theme {
+    pub fn apply_filter(&mut self, filter: &impl Filter) {
+        self.window_colors.as_mut().map(|x| x.apply_filter(filter));
+        self.bar_colors.as_mut().map(|x| x.apply_filter(filter));
+    }
 }
 
 #[derive(Debug)]

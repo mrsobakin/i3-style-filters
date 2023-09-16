@@ -17,6 +17,7 @@ colornamer = "0.1.0"
 regex = "1.0.0"
 lazy_static = "1.0.0"
 linked-hash-map = "0.5.1"
+palette = "0.7.3"
 
 [dev-dependencies]
 tempfile = "3.0.1"
