@@ -8,7 +8,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
 use yaml_rust::Yaml;
-use filters::Filter;
+use filters::{Filter, Filterable};
 
 #[derive(Debug)]
 pub struct ColorGroup {
@@ -18,20 +18,12 @@ pub struct ColorGroup {
     pub indicator: Option<String>,
 }
 
-impl ColorGroup {
+impl Filterable for ColorGroup {
     fn apply_filter(&mut self, filter: &impl Filter) {
-        if let Some(border) = &self.border {
-            self.border = Some(filter.apply(&border));
-        }
-        if let Some(background) = &self.background {
-            self.background = Some(filter.apply(&background));
-        }
-        if let Some(text) = &self.text {
-            self.text = Some(filter.apply(&text));
-        }
-        if let Some(indicator) = &self.indicator {
-            self.indicator = Some(filter.apply(&indicator));
-        }
+       self.border.apply_filter(filter);
+       self.background.apply_filter(filter);
+       self.text.apply_filter(filter);
+       self.indicator.apply_filter(filter);
     }
 }
 
@@ -93,12 +85,12 @@ pub struct WindowColors {
     pub urgent: Option<ColorGroup>,
 }
 
-impl WindowColors {
+impl Filterable for WindowColors {
     fn apply_filter(&mut self, filter: &impl Filter) {
-        self.focused.as_mut().map(|x| x.apply_filter(filter));
-        self.focused_inactive.as_mut().map(|x| x.apply_filter(filter));
-        self.unfocused.as_mut().map(|x| x.apply_filter(filter));
-        self.urgent.as_mut().map(|x| x.apply_filter(filter));
+        self.focused.apply_filter(filter);
+        self.focused_inactive.apply_filter(filter);
+        self.unfocused.apply_filter(filter);
+        self.urgent.apply_filter(filter);
     }
 }
 
@@ -113,21 +105,15 @@ pub struct BarColors {
     pub urgent_workspace: Option<ColorGroup>,
 }
 
-impl BarColors {
+impl Filterable for BarColors {
     fn apply_filter(&mut self, filter: &impl Filter) {
-        if let Some(separator) = &self.separator {
-            self.separator = Some(filter.apply(&separator));
-        }
-        if let Some(background) = &self.background {
-            self.background = Some(filter.apply(&background));
-        }
-        if let Some(statusline) = &self.statusline {
-            self.statusline = Some(filter.apply(&statusline));
-        }
-        self.focused_workspace.as_mut().map(|x| x.apply_filter(filter));
-        self.active_workspace.as_mut().map(|x| x.apply_filter(filter));
-        self.inactive_workspace.as_mut().map(|x| x.apply_filter(filter));
-        self.urgent_workspace.as_mut().map(|x| x.apply_filter(filter));
+        self.separator.apply_filter(filter);
+        self.background.apply_filter(filter);
+        self.focused_workspace.apply_filter(filter);
+        self.focused_workspace.apply_filter(filter);
+        self.active_workspace.apply_filter(filter);
+        self.inactive_workspace.apply_filter(filter);
+        self.urgent_workspace.apply_filter(filter);
     }
 }
 
